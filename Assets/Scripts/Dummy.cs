@@ -11,7 +11,7 @@ public class Dummy : MonoBehaviour {
     public float timeSinceDied = 0;
     public int hitCount = 0;
 
-    float invincabilityTime = 0.65f;
+	float invincibilityTime = 0.65f;
     public float timeSinceHit = 1000;
 
     // Use this for initialization
@@ -55,10 +55,10 @@ public class Dummy : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.tag == "PlayerAttack" && timeSinceHit > invincabilityTime)
+        if (other.tag == "PlayerAttack" && timeSinceHit > invincibilityTime)
         {
             hitCount++;
-            print(other.gameObject.name);
+			print(other.gameObject.name); // TODO: add particle effect here
             timeSinceHit = 0;
         }
         

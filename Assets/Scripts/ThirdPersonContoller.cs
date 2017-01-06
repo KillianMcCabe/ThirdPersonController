@@ -7,19 +7,15 @@ public class ThirdPersonContoller : MonoBehaviour {
     Animator animator;
     CharacterController controller;
     
-    float speed = 5.0f;
-    float jumpSpeed = 4;//3f;
     float gravity = 9.8f;
     float vSpeed = 0; // current vertical velocity
 
-    float standardYOffset = 2.3f;
-    float standardHeight = 4.7f;
-    float jumpYOffset = 3.73f;
-    float jumpHeight = 3f;
-
-    bool inAir = false;
-
     Vector3 movement = Vector3.zero;
+	public bool isGrounded = false;
+
+	public AnimationCurve jumpColliderScale;
+
+	float startHeight = 0f;
 
     // Use this for initialization
     void Start () {
@@ -27,146 +23,110 @@ public class ThirdPersonContoller : MonoBehaviour {
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
 
-        standardYOffset = controller.center.y;
-        standardHeight = controller.height;
-
-        jumpYOffset = standardYOffset;
-        jumpHeight = standardHeight;
+		startHeight = controller.height;
     }
 	
 	// Update is called once per frame
 	void Update () {
         
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("attack") || animator.GetCurrentAnimatorStateInfo(0).IsName("parry") || animator.GetCurrentAnimatorStateInfo(0).IsName("jump") )
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("attack") || animator.GetCurrentAnimatorStateInfo(0).IsName("jump") )
         {
-            animator.speed = 1;
-
-            
             ApplyGravity();
             return;
         }
-
-        // add gravity to vertical movement
+		isGrounded = controller.isGrounded;
         if (controller.isGrounded)
         {
             vSpeed = 0; // grounded character has vSpeed = 0...
-
-            if (inAir)
-            {
-                animator.SetTrigger("land");
-                print("land");
-                inAir = false;
-            }
             movement = Vector3.zero;
+			HandleActionInputs();
             HandleMovementInput();
-            HandleActionInputs();
+            
         }
         else
         {
             // no input and keep movement
-            //inAir = true;
         }
 
-        //controller.Move(movement * Time.deltaTime);
-        ApplyGravity();
-
-        //print("v: " + vertical + ", s: " + horizontal + ", mag: " + movement.magnitude);
+		ApplyGravity();
     }
 
     void HandleMovementInput()
     {
         // read input
-        float vertical = Input.GetAxis("Vertical");
-        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
+        float horizontal = Input.GetAxisRaw("Horizontal");
 
         // calculate movement vectors
         Vector3 verticalVector = Vector3.Cross(cam.transform.right, Vector3.up);
         Vector3 horizontalVector = (new Vector3(cam.transform.right.x, 0, cam.transform.right.z));
 
-        movement += (verticalVector * vertical * speed);
-        movement += (horizontalVector * horizontal * speed);
-        //movement = Vector3.ClampMagnitude(movement, maxSpeed);
+        movement += (verticalVector * vertical);
+        movement += (horizontalVector * horizontal);
+        movement = Vector3.ClampMagnitude(movement, 1);
 
         // turn in direction of movement input
-        if (vertical != 0 || horizontal != 0)
+		if (movement.magnitude != 0)
         {
             transform.rotation = Quaternion.LookRotation(movement);
         }
 
-        // set animator variables
-        Vector3 nonVerticalSpeed = movement;
-        nonVerticalSpeed.y = 0;
-        animator.SetFloat("speed", nonVerticalSpeed.magnitude);
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("walk"))
-        {
-            animator.speed = Mathf.Max(0.5f, movement.magnitude);
-        }
-        else if (animator.GetCurrentAnimatorStateInfo(0).IsName("run"))
-        {
-            animator.speed = Mathf.Max(0.5f, movement.magnitude / 4);
-        }
-        else
-        {
-            animator.speed = 1;
-        }
+		animator.SetFloat("Speed", movement.magnitude);
     }
 
     void HandleActionInputs()
     {
-        // attack
-        if (Input.GetButtonDown("Fire3"))
-        {
-            animator.SetTrigger("attack");
-        }
-        if (Input.GetButtonDown("Fire2"))
-        {
-            animator.SetTrigger("parry");
-        }
+        
+		// jump
         if (Input.GetButtonDown("Fire1"))
         {
-            animator.SetTrigger("jump");
-            animator.ResetTrigger("land");
-            print("jump");
+            animator.SetTrigger("Jump");
         }
+
+		// attack
+		if (Input.GetButtonDown("Fire2"))
+		{
+			animator.SetTrigger("Attack");
+		}
     }
 
-    // called from animation event
-    void Jump()
-    {
-        //vSpeed = jumpSpeed;
-        //Vector3 vMovement = Vector3.zero;
+	// TODO: use animation length in calculations incase we change animation speed or have two jump animations with different lengths
+	IEnumerator JumpScaling() {
+		if (jumpColliderScale.length > 0) {
+			// find length from last key
+			float curveTime = jumpColliderScale.keys [jumpColliderScale.length-1].time; 
 
-        //vSpeed -= gravity * Time.deltaTime;
-        //vMovement.y = vSpeed;
+			for (float t = 0f; t <= curveTime; t += Time.deltaTime) {
+				controller.height = startHeight * Mathf.Clamp01(jumpColliderScale.Evaluate (t));
+				yield return null;
+			}
 
-        //// reshape collider
-        //controller.center = new Vector3(controller.center.x, jumpYOffset, controller.center.z);
-        //controller.height = jumpHeight;
-
-        //controller.Move(vMovement * Time.deltaTime);
-        inAir = true;
-    }
+			controller.height = startHeight;
+		}
+	}
 
     void ApplyGravity()
     {
         if (controller.isGrounded)
         {
             vSpeed = 0; // grounded character has vSpeed = 0...
-
-            if (inAir)
-            {
-                animator.SetTrigger("land");
-                //controller.center =  new Vector3(controller.center.x, standardYOffset, controller.center.z);
-                //controller.height = standardHeight;
-                inAir = false;
-            }
         }
-        Vector3 vMovement = Vector3.zero;
-        
         vSpeed -= gravity * Time.deltaTime;
+
+		Vector3 vMovement = Vector3.zero;
         vMovement.y = vSpeed;
 
         controller.Move(vMovement * Time.deltaTime);
     }
+
+	void ApplyUpwardJump() {
+		vSpeed = 2.5f;
+		Vector3 vMovement = Vector3.zero;
+		vMovement.y = vSpeed;
+
+		controller.Move(vMovement * Time.deltaTime);
+
+		StartCoroutine ("JumpScaling");
+	}
 
 }

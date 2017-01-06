@@ -17,13 +17,13 @@ public class PlayerCombat : MonoBehaviour {
 
     public void SwingStart()
     {
-        print("SwingStart");
+        print("SwingStart"); // TODO: add particle effect here
         weaponCollider.enabled = true;
     }
 
     public void SwingEnd()
     {
-        print("SwingEnd");
+		print("SwingEnd"); // TODO: add particle effect here
         weaponCollider.enabled = false;
     }
 }
