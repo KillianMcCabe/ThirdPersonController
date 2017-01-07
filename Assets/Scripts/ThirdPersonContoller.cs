@@ -6,9 +6,10 @@ public class ThirdPersonContoller : MonoBehaviour {
     Camera cam;
     Animator animator;
     CharacterController controller;
-    
+
     float gravity = 9.8f;
     float vSpeed = 0; // current vertical velocity
+    float airMovementControl = 2f;
 
     Vector3 movement = Vector3.zero;
 	public bool isGrounded = false;
@@ -28,29 +29,33 @@ public class ThirdPersonContoller : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("attack") || animator.GetCurrentAnimatorStateInfo(0).IsName("jump") )
+
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Slash"))
         {
             ApplyGravity();
+
+            animator.SetFloat("Speed", 0);
             return;
         }
-		isGrounded = controller.isGrounded;
+
+        isGrounded = controller.isGrounded;
         if (controller.isGrounded)
         {
             vSpeed = 0; // grounded character has vSpeed = 0...
             movement = Vector3.zero;
-			HandleActionInputs();
+			
             HandleMovementInput();
-            
+            HandleActionInputs();
         }
         else
         {
-            // no input and keep movement
+            HandleMovementInputInAir();
         }
 
 		ApplyGravity();
     }
 
+    // TODO: Add turn speed
     void HandleMovementInput()
     {
         // read input
@@ -74,9 +79,26 @@ public class ThirdPersonContoller : MonoBehaviour {
 		animator.SetFloat("Speed", movement.magnitude);
     }
 
+    void HandleMovementInputInAir()
+    {
+        // read input
+        float vertical = Input.GetAxisRaw("Vertical");
+        float horizontal = Input.GetAxisRaw("Horizontal");
+
+        // calculate movement vectors
+        Vector3 verticalVector = Vector3.Cross(cam.transform.right, Vector3.up);
+        Vector3 horizontalVector = (new Vector3(cam.transform.right.x, 0, cam.transform.right.z));
+
+        Vector3 adjustedMovement = Vector3.zero;
+        adjustedMovement += (verticalVector * vertical);
+        adjustedMovement += (horizontalVector * horizontal);
+        adjustedMovement = Vector3.ClampMagnitude(adjustedMovement, 1) * airMovementControl;
+
+        controller.Move(adjustedMovement * Time.deltaTime);
+    }
+
     void HandleActionInputs()
     {
-        
 		// jump
         if (Input.GetButtonDown("Fire1"))
         {
@@ -87,7 +109,7 @@ public class ThirdPersonContoller : MonoBehaviour {
 		if (Input.GetButtonDown("Fire2"))
 		{
 			animator.SetTrigger("Attack");
-		}
+        }
     }
 
 	// TODO: use animation length in calculations incase we change animation speed or have two jump animations with different lengths

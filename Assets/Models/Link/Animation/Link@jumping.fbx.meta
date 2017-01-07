@@ -102,7 +102,7 @@ ModelImporter:
     - serializedVersion: 16
       name: jumping
       takeName: mixamo.com
-      firstFrame: 0
+      firstFrame: 10
       lastFrame: 34
       wrapMode: 0
       orientationOffsetY: 0

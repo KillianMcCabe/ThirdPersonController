@@ -15,7 +15,6 @@ public class OldThirdPersonContoller : MonoBehaviour {
     float standardYOffset = 2.3f;
     float standardHeight = 4.7f;
     float jumpYOffset = 3.73f;
-    float jumpHeight = 3f;
 
     bool inAir = false;
 
@@ -26,12 +25,6 @@ public class OldThirdPersonContoller : MonoBehaviour {
         cam = Camera.main;
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
-
-        standardYOffset = controller.center.y;
-        standardHeight = controller.height;
-
-        jumpYOffset = standardYOffset;
-        jumpHeight = standardHeight;
     }
 	
 	// Update is called once per frame
