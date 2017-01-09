@@ -22,7 +22,7 @@ public class CameraControlls : MonoBehaviour {
     }
 	
 	// Update is called once per frame
-	void Update () {
+	void LateUpdate () {
         //focus = GameObject.Find("Player-FocusTarget");
         
         float horizontal = Input.GetAxis("CameraVertical");

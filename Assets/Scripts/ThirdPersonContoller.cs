@@ -55,7 +55,7 @@ public class ThirdPersonContoller : MonoBehaviour {
 		ApplyGravity();
     }
 
-    // TODO: Add turn speed
+    // TODO: Add turn speed/animation
     void HandleMovementInput()
     {
         // read input
@@ -70,13 +70,24 @@ public class ThirdPersonContoller : MonoBehaviour {
         movement += (horizontalVector * horizontal);
         movement = Vector3.ClampMagnitude(movement, 1);
 
-        // turn in direction of movement input
-		if (movement.magnitude != 0)
+        // turn in direction of movement input if running
+        if (movement.magnitude != 0 && (animator.GetCurrentAnimatorStateInfo(0).IsName("walking") || animator.GetCurrentAnimatorStateInfo(0).IsName("running") || animator.GetCurrentAnimatorStateInfo(0).IsName("MovementTree")))
         {
-            transform.rotation = Quaternion.LookRotation(movement);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(movement), 10);
         }
 
+        float angle = Vector3.Angle(transform.forward, movement);
+        if (Vector3.Dot(movement, transform.right) < 0)
+        {
+            angle = -angle;
+        }
+        angle = angle / 180f;
+        print(angle);
+
 		animator.SetFloat("Speed", movement.magnitude);
+        animator.SetFloat("Angle", angle);
+
+        // TODO: falling animation
     }
 
     void HandleMovementInputInAir()
