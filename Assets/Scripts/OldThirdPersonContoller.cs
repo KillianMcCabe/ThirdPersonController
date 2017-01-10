@@ -8,13 +8,8 @@ public class OldThirdPersonContoller : MonoBehaviour {
     CharacterController controller;
     
     float speed = 5.0f;
-    float jumpSpeed = 4;//3f;
     float gravity = 9.8f;
     float vSpeed = 0; // current vertical velocity
-
-    float standardYOffset = 2.3f;
-    float standardHeight = 4.7f;
-    float jumpYOffset = 3.73f;
 
     bool inAir = false;
 

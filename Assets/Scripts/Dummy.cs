@@ -4,6 +4,8 @@ using System.Collections;
 public class Dummy : MonoBehaviour {
 
     HingeJoint[] joints;
+    [SerializeField]
+    Transform hitPos;
 
     public bool isDead = false;
     float reviveTime = 5;
@@ -58,7 +60,7 @@ public class Dummy : MonoBehaviour {
         if (other.tag == "PlayerAttack" && timeSinceHit > invincibilityTime)
         {
             hitCount++;
-			print(other.gameObject.name); // TODO: add particle effect here
+            Instantiate(Resources.Load("SlashEffect"), hitPos.transform.position, Quaternion.identity);
             timeSinceHit = 0;
         }
         

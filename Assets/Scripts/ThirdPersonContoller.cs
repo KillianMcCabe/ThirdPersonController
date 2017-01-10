@@ -6,6 +6,7 @@ public class ThirdPersonContoller : MonoBehaviour {
     Camera cam;
     Animator animator;
     CharacterController controller;
+    
 
     float gravity = 9.8f;
     float vSpeed = 0; // current vertical velocity
@@ -23,8 +24,9 @@ public class ThirdPersonContoller : MonoBehaviour {
         cam = Camera.main;
         animator = GetComponent<Animator>();
         controller = GetComponent<CharacterController>();
+        
 
-		startHeight = controller.height;
+        startHeight = controller.height;
     }
 	
 	// Update is called once per frame
@@ -33,6 +35,7 @@ public class ThirdPersonContoller : MonoBehaviour {
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("Slash"))
         {
             ApplyGravity();
+            
 
             animator.SetFloat("Speed", 0);
             return;
@@ -73,7 +76,7 @@ public class ThirdPersonContoller : MonoBehaviour {
         // turn in direction of movement input if running
         if (movement.magnitude != 0 && (animator.GetCurrentAnimatorStateInfo(0).IsName("walking") || animator.GetCurrentAnimatorStateInfo(0).IsName("running") || animator.GetCurrentAnimatorStateInfo(0).IsName("MovementTree")))
         {
-            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(movement), 10);
+            transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(movement), 360 * Time.deltaTime);
         }
 
         float angle = Vector3.Angle(transform.forward, movement);
@@ -82,7 +85,7 @@ public class ThirdPersonContoller : MonoBehaviour {
             angle = -angle;
         }
         angle = angle / 180f;
-        print(angle);
+        //print(angle);
 
 		animator.SetFloat("Speed", movement.magnitude);
         animator.SetFloat("Angle", angle);

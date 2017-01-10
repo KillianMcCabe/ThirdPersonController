@@ -1,12 +1,23 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using Xft;
+
 public class PlayerCombat : MonoBehaviour {
 
-    public Collider weaponCollider;
 
-	// Use this for initialization
-	void Start () {
+    [SerializeField]
+    Collider weaponCollider;
+
+    XWeaponTrail weaponTrail;
+    
+
+    // Use this for initialization
+    void Start () {
+        weaponTrail = GetComponentInChildren<XWeaponTrail>();
+        weaponTrail.Init();
+        weaponTrail.Deactivate();
+
         weaponCollider.enabled = false;
     }
 	
@@ -17,13 +28,14 @@ public class PlayerCombat : MonoBehaviour {
 
     public void SwingStart()
     {
-        print("SwingStart"); // TODO: add particle effect here
+        weaponTrail.Activate();
         weaponCollider.enabled = true;
     }
 
     public void SwingEnd()
     {
-		print("SwingEnd"); // TODO: add particle effect here
+        weaponTrail.StopSmoothly(0.3f);
         weaponCollider.enabled = false;
     }
+    
 }
